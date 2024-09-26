@@ -15,3 +15,9 @@ app.use("/ingredients", ingredientRouter);
 app.use("/recipes", recipeRouter);
 app.use("/tags", tagRouter);
 app.use("/", indexRouter);
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Listening on port: ${PORT}`);
+});
