@@ -18,12 +18,26 @@ exports.getTag = asyncHandler(async (req, res) => {
 })
 
 // handle GET for tag creation form
-exports.createTag = (req, res) => {
+exports.createTagGet = (req, res) => {
     res.render("tagForm");
 };
 
-
 // handle POST for tag creation form
+// WIP
+exports.createTagPost = [
+    tagValidation,
+    (req, res) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()) {
+            res.render("tagForm", {
+                title: "Create New Tag",
+                errors: errors.array(),
+                tag: req.body
+            });
+        }
+
+    }
+];
 
 // handle GET for tag update form
 
