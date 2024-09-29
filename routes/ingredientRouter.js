@@ -3,6 +3,9 @@ const ingredientsRouter = Router();
 
 const ingredientController = require("../controllers/ingredientController");
 
+// GET full list of ingredients
+ingredientsRouter.get("/", ingredientController.ingredientList);
+
 // handle GET for ingredient creation form
 ingredientsRouter.get("/create", ingredientController.createIngredientGet);
 
@@ -21,9 +24,8 @@ ingredientsRouter.get("/delete/:id", ingredientController.deleteIngredientGet);
 // handle POST for ingredient deletion form
 ingredientsRouter.post("/delete/:id", ingredientController.deleteIngredientPost);
 
-// GET full list of ingredients
-ingredientsRouter.get("/list", ingredientController.ingredientList);
-
 // ingredient GET for one ingredient
 // this route needs to be last
 ingredientsRouter.get("/:id", ingredientController.getIngredient);
+
+module.exports = ingredientsRouter;

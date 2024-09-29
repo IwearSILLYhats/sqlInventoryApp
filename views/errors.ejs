@@ -1,0 +1,7 @@
+<% if( errors.typeOf() !== undefined){ %>
+    <ul>
+        <% errors.foreach(error => { %>
+            <li> <%= error %> </li>
+        <% }) %>
+    </ul>
+<% } %>

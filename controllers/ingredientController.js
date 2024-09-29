@@ -12,17 +12,41 @@ const ingredientValidation = [
 ];
 
 // ingredient GET for one ingredient
+exports.getIngredient = (req, res) => {
+
+};
 
 // handle GET for ingredient creation form
+exports.createIngredientGet = (req, res) => {
+
+};
 
 // handle POST for ingredient creation form
+exports.createIngredientPost = (req, res) => {
+
+};
 
 // handle GET for ingredient update form
+exports.updateIngredientGet = (req, res) => {
+
+};
 
 // handle POST for ingredient update form
+exports.updateIngredientPost = (req, res) => {
+
+};
 
 // handle GET for ingredient deletion form
+exports.deleteIngredientGet = (req, res) => {
+
+};
 
 // handle POST for ingredient deletion form
+exports.deleteIngredientPost = (req, res) => {
+
+};
 
 // GET full list of ingredients
+exports.ingredientList = (req, res) => {
+
+};

@@ -3,6 +3,9 @@ const recipesRouter = Router();
 
 const recipecontroller = require("../controllers/recipeController");
 
+// GET full list of recipes
+recipesRouter.get("/", recipecontroller.recipeList);
+
 // handle GET for recipe creation form
 recipesRouter.get("/create", recipecontroller.createRecipeGet);
 
@@ -21,9 +24,8 @@ recipesRouter.get("/delete/:id", recipecontroller.deleteRecipeGet);
 // handle POST for recipe deletion form
 recipesRouter.post("/delete/:id", recipecontroller.deleteRecipePost);
 
-// GET full list of recipes
-recipesRouter.get("/recipes", recipecontroller.recipeList);
-
 // recipe GET for one recipe
 // this route needs to be last
 recipesRouter.get("/:id", recipecontroller.getRecipe);
+
+module.exports = recipesRouter;

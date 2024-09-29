@@ -40,12 +40,24 @@ exports.createTagPost = [
 ];
 
 // handle GET for tag update form
+exports.updateTagGet = (req, res) => {
+
+};
 
 // handle POST for tag update form
+exports.updateTagPost = (req, res) => {
+
+};
 
 // handle GET for tag deletion form
+exports.deleteTagGet = (req, res) => {
+
+};
 
 // handle POST for tag deletion form
+exports.deleteTagPost = (req, res) => {
+
+};
 
 // GET full list of tags
 exports.tagList = asyncHandler(async (req, res) => {

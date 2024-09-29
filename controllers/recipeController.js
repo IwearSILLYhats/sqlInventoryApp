@@ -13,17 +13,41 @@ const recipeValidation = [
 ];
 
 // recipe GET for one recipe
+exports.getRecipe = (req, res) => {
+
+};
 
 // handle GET for recipe creation form
+exports.createRecipeGet = (req, res) => {
+
+};
 
 // handle POST for recipe creation form
+exports.createRecipePost = (req, res) => {
+
+};
 
 // handle GET for recipe update form
+exports.updateRecipeGet = (req, res) => {
+
+};
 
 // handle POST for recipe update form
+exports.updateRecipePost = (req, res) => {
+
+};
 
 // handle GET for recipe deletion form
+exports.deleteRecipeGet = (req, res) => {
+
+};
 
 // handle POST for recipe deletion form
+exports.deleteRecipePost = (req, res) => {
+
+};
 
 // GET full list of recipes
+exports.recipeList = (req, res) => {
+
+};

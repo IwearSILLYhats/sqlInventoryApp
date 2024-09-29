@@ -3,6 +3,9 @@ const tagsRouter = Router();
 
 const tagcontroller = require("../controllers/tagController");
 
+// GET full list of tags
+tagsRouter.get("/", tagcontroller.tagList);
+
 // handle GET for tag creation form
 tagsRouter.get("/create", tagcontroller.createTagGet);
 
@@ -21,9 +24,8 @@ tagsRouter.get("/delete/:id", tagcontroller.deleteTagGet);
 // handle POST for tag deletion form
 tagsRouter.post("/delete/:id", tagcontroller.deleteTagPost);
 
-// GET full list of tags
-tagsRouter.get("/list", tagcontroller.tagList);
-
 // tag GET for one tag
 // this route needs to be last
 tagsRouter.get("/:id", tagcontroller.getTag);
+
+module.exports = tagsRouter;

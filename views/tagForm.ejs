@@ -1,7 +1,7 @@
 <form action="" method="post">
     <label for="name">Name:</label>
-    <input type="text" name="name" id="name" value=<%= tag.name ? tag.name : "" %>>
+    <input type="text" name="name" id="name" value=<%= tag.name ? tag.name : "" %> placeholder="Tag name">
     <label for="info">Info:</label>
-    <textarea name="description" id="description"> <%= tag.description ? tag.description : "" %> </textarea>
+    <textarea name="description" id="description" placeholder="Tag description"> <%= tag.description ? tag.description : "" %> </textarea>
     <button type="submit">Submit</button>
 </form>
