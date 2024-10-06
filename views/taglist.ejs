@@ -1,0 +1,17 @@
+<h1> <%= title %> </h1>
+
+<% if(typeof tags !== "undefined"){ %>
+    <div class="cardWrapper">
+        <% tags.forEach(tag => { %>
+            <div>
+                <h3> <%= tag.name %> </h3>
+            </div>
+        <% }) %>
+        </div>
+<% } else { %>
+        <p>No tags were found.</p>
+    <% } %>
+
+<a href="/tags/create">
+    <p>Create a new tag</p>
+</a>

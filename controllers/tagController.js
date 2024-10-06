@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
-const db = require("../db/pool");
+const query = require("../db/pool");
 
 const tagValidation = [
     body("name").trim().escape()
@@ -13,13 +13,13 @@ const tagValidation = [
 
 // tag GET for one tag
 exports.getTag = asyncHandler(async (req, res) => {
-    const tag = await db.query(`SELECT * FROM tags WHERE id = ${req.params.id}`);
+    const tag = await query(`SELECT * FROM tags WHERE id = ${req.params.id}`);
     res.render("tagDetail", { tagData: tag.rows[0]});
-})
+});
 
 // handle GET for tag creation form
 exports.createTagGet = (req, res) => {
-    res.render("tagForm");
+    res.render("tagForm", { title: "Create a new tag" });
 };
 
 // handle POST for tag creation form
@@ -61,6 +61,6 @@ exports.deleteTagPost = (req, res) => {
 
 // GET full list of tags
 exports.tagList = asyncHandler(async (req, res) => {
-    const tags = await db.query("SELECT * FROM tags");
-    res.render("taglist", { tags: tags.rows });
+    const tags = await query("SELECT * FROM tags");
+    res.render("taglist", { title: "Taglist", tags: tags.rows });
 });
