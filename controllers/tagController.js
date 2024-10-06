@@ -26,7 +26,7 @@ exports.createTagGet = (req, res) => {
 // WIP
 exports.createTagPost = [
     tagValidation,
-    (req, res) => {
+   async (req, res) => {
         const errors = validationResult(req);
         if(!errors.isEmpty()) {
             res.render("tagForm", {
@@ -35,7 +35,9 @@ exports.createTagPost = [
                 tag: req.body
             });
         }
-
+        await query(`INSERT INTO tags (name, description)
+            VALUES ('${req.body.name}', '${req.body.description}')`);
+        res.redirect("/tags");
     }
 ];
 
