@@ -14,7 +14,10 @@ const tagValidation = [
 // tag GET for one tag
 exports.getTag = asyncHandler(async (req, res) => {
     const tag = await query(`SELECT * FROM tags WHERE id = ${req.params.id}`);
-    res.render("tagDetail", { tagData: tag.rows[0]});
+    if(tag === null) {
+        res.redirect("/tags");
+    }
+    res.render("tagDetail", { title: "Tag Detail", tag: tag.rows[0]});
 });
 
 // handle GET for tag creation form
@@ -29,7 +32,7 @@ exports.createTagPost = [
    async (req, res) => {
         const errors = validationResult(req);
         if(!errors.isEmpty()) {
-            res.render("tagForm", {
+            return res.render("tagForm", {
                 title: "Create New Tag",
                 errors: errors.array(),
                 tag: req.body
