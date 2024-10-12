@@ -1,4 +1,14 @@
 <main>
-    <h1> <%= tag.name %></h1>
-    <p> <%= tag.description %> </p>
+    <div>
+        <h1> <%= tag.name %></h1>
+        <p> <%= tag.description %> </p>
+    </div>
+    <div>
+        <a href="/tags/update/<%= tag.id %>">
+            <button>Update</button>
+        </a>
+        <a href="/tags/delete/<%= tag.id %>">
+            <button>Delete</button>
+        </a>
+    </div>
 </main>
