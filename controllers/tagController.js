@@ -7,7 +7,6 @@ const tagValidation = [
     .isAlphanumeric().withMessage("Tag name must be alphanumeric")
     .isLength(3).withMessage("Tag name must be at least 3 characters"),
     body("description").trim().escape()
-    .isAlphanumeric().withMessage("Description must be alphanumeric")
     .optional()
 ];
 
