@@ -1,13 +1,13 @@
 <main>
     <div>
-        <h1> <%= tag.name %></h1>
-        <p> <%= tag.description %> </p>
+        <h1> <%= tag.tag %></h1>
+        <p> <%- tag.tag_description %> </p>
     </div>
     <div>
-        <a href="/tags/update/<%= tag.id %>">
+        <a href="/tags/update/<%= tag.tag_id %>">
             <button>Update</button>
         </a>
-        <a href="/tags/delete/<%= tag.id %>">
+        <a href="/tags/delete/<%= tag.tag_id %>">
             <button>Delete</button>
         </a>
     </div>

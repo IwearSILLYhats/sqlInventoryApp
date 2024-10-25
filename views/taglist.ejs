@@ -4,8 +4,8 @@
     <div class="cardWrapper">
         <% tags.forEach(tag => { %>
             <div>
-                <a href=<%= `/tags/${tag.id}` %>>
-                    <h3> <%= tag.name %> </h3>
+                <a href=<%= `/tags/${tag.tag_id}` %>>
+                    <h3> <%= tag.tag %> </h3>
                 </a>
             </div>
         <% }) %>

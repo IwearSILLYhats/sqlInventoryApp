@@ -1,7 +1,7 @@
 <form action="" method="post">
     <label for="name">Name:</label>
-    <input type="text" name="name" id="name" value="<%= typeof tag !== "undefined" ? tag.name : "" %>" placeholder="Tag name" required>
+    <input type="text" name="name" id="name" value="<%= typeof tag !== "undefined" ? tag.tag : "" %>" placeholder="Tag name" required>
     <label for="description">Info:</label>
-    <textarea name="description" id="description" placeholder="Tag description"><%= typeof tag !== "undefined" ? tag.description : '' %></textarea>
+    <textarea name="description" id="description" placeholder="Tag description"><%- typeof tag !== "undefined" ? tag.tag_description : '' %></textarea>
     <button type="submit">Submit</button>
 </form>

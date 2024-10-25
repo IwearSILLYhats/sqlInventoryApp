@@ -12,7 +12,7 @@ const tagValidation = [
 
 // tag GET for one tag
 exports.getTag = asyncHandler(async (req, res) => {
-    const tag = await query(`SELECT * FROM tags WHERE id = ${req.params.id}`);
+    const tag = await query(`SELECT * FROM tags WHERE tag_id = ${req.params.id}`);
     if(tag === null) {
         res.redirect("/tags");
     }
@@ -36,7 +36,7 @@ exports.createTagPost = [
                 tag: req.body
             });
         }
-        await query(`INSERT INTO tags (name, description)
+        await query(`INSERT INTO tags (tag, tag_description)
             VALUES ('${req.body.name}', '${req.body.description}')`);
         res.redirect("/tags");
     })
@@ -44,7 +44,7 @@ exports.createTagPost = [
 
 // handle GET for tag update form
 exports.updateTagGet = asyncHandler( async (req, res, next) => {
-    const tag = await query(`SELECT * FROM tags WHERE id = ${req.params.id}`);
+    const tag = await query(`SELECT * FROM tags WHERE tag_id = ${req.params.id}`);
     if (tag === null) {
         return res.redirect("/tags")
     }
@@ -55,7 +55,24 @@ exports.updateTagGet = asyncHandler( async (req, res, next) => {
 exports.updateTagPost = [
     tagValidation,
     asyncHandler( async (req, res) => {
+        const errors = validationResult(req);
+        const tag = {
+            id: req.params.id,
+            tag: req.body.name,
+            description: req.body.description
+        };
 
+        if (!errors.isEmpty) {
+            return res.render("tagForm", {
+                title: "Update Tag",
+                tag: tag
+            });
+        }
+        await query({
+            text: "UPDATE tags SET (tag, tag_description) = ($1, $2)WHERE tag_id = $3",
+            values: [tag.tag, tag.description, tag.id]
+        });
+        res.redirect(`/tags/${tag.id}`);
 })];
 
 // handle GET for tag deletion form
