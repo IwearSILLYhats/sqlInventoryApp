@@ -88,5 +88,5 @@ exports.deleteTagPost = (req, res) => {
 // GET full list of tags
 exports.tagList = asyncHandler(async (req, res, next) => {
     const tags = await query("SELECT * FROM tags");
-    res.render("taglist", { title: "Taglist", tags: tags.rows });
+    res.render("taglist", { title: "Tag List", tags: tags.rows });
 });

@@ -78,3 +78,8 @@ h1 {
 	font-size: 200%;
 	font-weight: bold;
 }
+form {
+	display: flex;
+	flex-direction: column;
+	gap: .5rem;
+}

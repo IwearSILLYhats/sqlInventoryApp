@@ -1,0 +1,19 @@
+<h1> <%= title %> </h1>
+
+<% if(typeof ingredients !== "undefined"){ %>
+    <div class="cardWrapper">
+        <% ingredients.forEach(ingredient => { %>
+            <div>
+                <a href=<%= `/ingredients/${ingredient.ingredient_id}` %>>
+                    <h3> <%= ingredient.ingredient %> </h3>
+                </a>
+            </div>
+        <% }) %>
+        </div>
+<% } else { %>
+        <p>No ingredients were found.</p>
+    <% } %>
+
+<a href="/ingredients/create">
+    <p>Create a new ingredient</p>
+</a>
