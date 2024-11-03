@@ -1,0 +1,15 @@
+<main></main>
+    <div>
+        <h1> <%= ingredient.ingredient_name %></h1>
+        <h3> <%= ingredient.ingredient_type %></h3>
+        <p> <%- ingredient.ingredient_description %> </p>
+    </div>
+    <div>
+        <a href="/ingredients/update/<%= ingredient.ingredient_id %>">
+            <button>Update</button>
+        </a>
+        <a href="/ingredients/delete/<%= ingredient.ingredient_id %>">
+            <button>Delete</button>
+        </a>
+    </div>
+</main>

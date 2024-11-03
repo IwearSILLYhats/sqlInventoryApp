@@ -1,11 +1,11 @@
 <form action="" method="post">
     <label for="name">Name:</label>
-    <input type="text" name="name" id="name" value="<%= typeof ingredient !== "undefined" ? ingredient.ingredient : "" %>" placeholder="Ingredient name" required>
+    <input type="text" name="name" id="name" value="<%= typeof ingredient !== "undefined" ? ingredient.ingredient_name : "" %>" placeholder="Ingredient name" required>
     <label for="type">Type:</label>
     <select name="type" id="type">
-        <option value="dry" <%= typeof ingredient !== "undefined" && ingredient.type === "dry" ? selected : "" %>>Dry</option>
-        <option value="cold" <%= typeof ingredient !== "undefined" &&ingredient.type === "cold" ? selected : "" %>>Cold</option>
-        <option value="produce" <%= typeof ingredient !== "undefined" && ingredient.type === "produce" ? selected : "" %>>Produce</option>
+        <option value="dry" <%= typeof ingredient !== "undefined" && ingredient.ingredient_type === "dry" ? "selected" : "" %>>Dry</option>
+        <option value="cold" <%= typeof ingredient !== "undefined" && ingredient.ingredient_type === "cold" ? "selected" : "" %>>Cold</option>
+        <option value="produce" <%= typeof ingredient !== "undefined" && ingredient.ingredient_type === "produce" ? "selected" : "" %>>Produce</option>
     </select>
     <label for="description">Info:</label>
     <textarea name="description" id="description" placeholder="Ingredient description"><%- typeof ingredient !== "undefined" ? ingredient.ingredient_description : '' %></textarea>
