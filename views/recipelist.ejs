@@ -1,0 +1,19 @@
+<h1> <%= title %> </h1>
+
+<% if(typeof recipes !== "undefined"){ %>
+    <div class="cardWrapper">
+        <% recipes.forEach(recipe => { %>
+            <div>
+                <a href=<%= `/recipes/${recipe.recipe_id}` %>>
+                    <h3> <%= recipe.recipe %> </h3>
+                </a>
+            </div>
+        <% }) %>
+        </div>
+<% } else { %>
+        <p>No recipes were found.</p>
+    <% } %>
+
+<a href="/recipes/create">
+    <p>Create a new recipe</p>
+</a>

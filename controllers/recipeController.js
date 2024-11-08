@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
+const query = require("../db/pool");
 
 const recipeValidation = [
     body("name").trim().escape()
@@ -13,9 +14,19 @@ const recipeValidation = [
 ];
 
 // recipe GET for one recipe
-exports.getRecipe = (req, res) => {
-
-};
+exports.getRecipe = asyncHandler( async (req, res) => {
+    const recipe = await query({
+        text: "SELECT * FROM recipes WHERE recipe_id = $1",
+        values: [req.params.id]
+    });
+    if(recipe.rows[0] === undefined) {
+        return res.redirect("/recipes");
+    }
+    res.render("recipeDetail", {
+        title: "Recipe Detail",
+        recipe: recipe.rows[0]
+    });
+});
 
 // handle GET for recipe creation form
 exports.createRecipeGet = (req, res) => {
@@ -48,6 +59,7 @@ exports.deleteRecipePost = (req, res) => {
 };
 
 // GET full list of recipes
-exports.recipeList = (req, res) => {
-
-};
+exports.recipeList = asyncHandler( async (req, res) => {
+    const recipes = await query("SELECT * FROM recipes");
+    res.render("recipelist", { title: "Recipe List", recipes: recipes.rows });
+});

@@ -33,6 +33,7 @@ body {
 	line-height: 1;
 	width: 100%;
 	height: 100%;
+	min-height: 100vh;
 }
 ol, ul {
 	list-style: none;
@@ -59,6 +60,7 @@ nav {
 	background-color: lightgrey;
 	padding: 1rem;
 	min-width: 7rem;
+	min-height: 80%;
 }
 nav li {
 	padding-top: 1rem;
@@ -67,6 +69,7 @@ nav li:hover {
 	font-weight: bold;
 }
 .bodyWrapper {
+	height: 100%;
 	display: flex;
 	flex-direction: row;
 }

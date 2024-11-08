@@ -71,9 +71,27 @@ exports.updateIngredientGet = asyncHandler ( async (req, res) => {
 });
 
 // handle POST for ingredient update form
-exports.updateIngredientPost = (req, res) => {
-
-};
+exports.updateIngredientPost = [
+    ingredientValidation,
+    asyncHandler( async (req, res) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()) {
+            return res.render("ingredientForm", {
+                title: "Update an Ingredient",
+                errors: errors.array(),
+                ingredient: {
+                    ingredient_name: req.body.name,
+                    ingredient_type: req.body.type,
+                    ingredient_description: req.body.description
+                }
+            });
+        }
+        await query({ text: "UPDATE ingredients SET (ingredient_name, ingredient_type, ingredient_description) = ($1, $2, $3) WHERE ingredient_id = $4",
+            values: [req.body.name, req.body.type, req.body.description, req.params.id]
+        });
+        res.redirect("/ingredients");
+    })
+];
 
 // handle GET for ingredient deletion form
 exports.deleteIngredientGet = (req, res) => {
