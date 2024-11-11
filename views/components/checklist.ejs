@@ -1,0 +1,13 @@
+<fieldset>
+    <legend><%= header %></legend>
+    <% if (typeof data !== "undefined") { %>
+        <% data.forEach(item => { %>
+            <div>
+                <label for="<%= data.name %>"><%= data.name %></label>
+                <input type="checkbox" name="<%= header %>" id="<%= data.name %>" value="<%= data.id %>">
+            </div>
+        <% }) %>
+    <% } else { %>
+        <p>No <%= header.toLowerCase() %> found</p>
+    <% } %>
+</fieldset>

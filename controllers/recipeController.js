@@ -29,9 +29,24 @@ exports.getRecipe = asyncHandler( async (req, res) => {
 });
 
 // handle GET for recipe creation form
-exports.createRecipeGet = (req, res) => {
+exports.createRecipeGet = asyncHandler ( async (req, res) => {
 
-};
+    const tags = query ({
+        text: "SELECT * from tags",
+        values: []
+    });
+    const ingredients = query ({
+        text: "SELECT * from ingredients",
+        values: []
+    });
+    const results = await Promise.all([tags, ingredients]);
+
+    res.render("recipeForm", {
+        title: "Create a recipe",
+        tags: tags.rows,
+        ingredients: ingredients.rows
+    })
+});
 
 // handle POST for recipe creation form
 exports.createRecipePost = (req, res) => {
