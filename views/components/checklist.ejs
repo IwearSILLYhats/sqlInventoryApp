@@ -3,8 +3,8 @@
     <% if (typeof data !== "undefined") { %>
         <% data.forEach(item => { %>
             <div>
-                <label for="<%= data.name %>"><%= data.name %></label>
-                <input type="checkbox" name="<%= header %>" id="<%= data.name %>" value="<%= data.id %>">
+                <label for="<%= item.name %>"><%= item.name %></label>
+                <input type="checkbox" name="<%= header %>" id="<%= item.name %>" value="<%= item.id %>" checked=<%= item.hasOwnProperty("checked") ? item.checked : false %>>
             </div>
         <% }) %>
     <% } else { %>

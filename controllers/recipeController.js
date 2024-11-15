@@ -31,15 +31,9 @@ exports.getRecipe = asyncHandler( async (req, res) => {
 // handle GET for recipe creation form
 exports.createRecipeGet = asyncHandler ( async (req, res) => {
 
-    const tags = query ({
-        text: "SELECT * from tags",
-        values: []
-    });
-    const ingredients = query ({
-        text: "SELECT * from ingredients",
-        values: []
-    });
-    const results = await Promise.all([tags, ingredients]);
+    const [tags, ingredients] = await Promise.all([
+        query ("SELECT tag_id AS id, tag AS name from tags"), 
+        query ("SELECT ingredient_id AS id, ingredient_name AS name from ingredients")]);
 
     res.render("recipeForm", {
         title: "Create a recipe",
@@ -49,9 +43,39 @@ exports.createRecipeGet = asyncHandler ( async (req, res) => {
 });
 
 // handle POST for recipe creation form
-exports.createRecipePost = (req, res) => {
+// WIP
+exports.createRecipePost = [
+    recipeValidation,
+    asyncHandler( async (req, res) => {
+        const errors = validationResult(req);
 
-};
+        if(!errors.isEmpty()) {
+            const [tags, ingredients] = await Promise.all([
+                query ("SELECT tag_id AS id, tag AS name from tags"), 
+                query ("SELECT ingredient_id AS id, ingredient_name AS name from ingredients")]);
+            compareLists(tags.rows, req.body.tags);
+            compareLists(ingredients.rows, req.body.ingredients);
+
+            return res.render("recipeForm", {
+                title: "Create a recipe",
+                tags: tags.rows,
+                ingredients: ingredients.rows,
+                recipe: {
+                    recipe_name: req.body.name,
+                    recipe_description: req.body.description
+                },
+                errors: errors
+            })
+        }
+        else {
+            const newRecipe = await query({
+                text:"INSERT INTO recipes (recipe_name, recipe_description) VALUES ($1, $2) RETURNING recipe_id",
+                values: [req.body.name, req.body.description]
+            });
+            // TO DO - replace query with pool to enable transactions for junction tables
+        }
+    })
+]
 
 // handle GET for recipe update form
 exports.updateRecipeGet = (req, res) => {
@@ -78,3 +102,11 @@ exports.recipeList = asyncHandler( async (req, res) => {
     const recipes = await query("SELECT * FROM recipes");
     res.render("recipelist", { title: "Recipe List", recipes: recipes.rows });
 });
+
+function compareLists (fullList, selected) {
+    fullList.forEach(item => {
+        if (selected.includes(item.id)) {
+            item.checked = true;
+        }
+    })
+};
