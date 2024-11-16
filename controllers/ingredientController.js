@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
-const query = require("../db/pool");
+const pool = require("../db/pool");
 
 const ingredientValidation = [
     body("name").trim().escape()
@@ -14,7 +14,7 @@ const ingredientValidation = [
 
 // ingredient GET for one ingredient
 exports.getIngredient = asyncHandler( async (req, res) => {
-    const ingredient = await query({
+    const ingredient = await pool.query({
         text: "SELECT * FROM ingredients WHERE ingredient_id = $1",
         values: [req.params.id]
     });
@@ -48,7 +48,7 @@ exports.createIngredientPost = [
                 }
             });
         }
-        await query({ text: "INSERT INTO ingredients (ingredient_name, ingredient_type, ingredient_description) VALUES ($1, $2, $3)",
+        await pool.query({ text: "INSERT INTO ingredients (ingredient_name, ingredient_type, ingredient_description) VALUES ($1, $2, $3)",
             values: [req.body.name, req.body.type, req.body.description]
         });
         res.redirect("/ingredients");
@@ -57,7 +57,7 @@ exports.createIngredientPost = [
 
 // handle GET for ingredient update form
 exports.updateIngredientGet = asyncHandler ( async (req, res) => {
-    const ingredient = await query({
+    const ingredient = await pool.query({
         text: "SELECT * FROM ingredients WHERE ingredient_id = $1",
         values: [req.params.id]
     })
@@ -86,7 +86,7 @@ exports.updateIngredientPost = [
                 }
             });
         }
-        await query({ text: "UPDATE ingredients SET (ingredient_name, ingredient_type, ingredient_description) = ($1, $2, $3) WHERE ingredient_id = $4",
+        await pool.query({ text: "UPDATE ingredients SET (ingredient_name, ingredient_type, ingredient_description) = ($1, $2, $3) WHERE ingredient_id = $4",
             values: [req.body.name, req.body.type, req.body.description, req.params.id]
         });
         res.redirect("/ingredients");
@@ -105,6 +105,6 @@ exports.deleteIngredientPost = (req, res) => {
 
 // GET full list of ingredients
 exports.ingredientList = asyncHandler( async (req, res) => {
-    const ingredients = await query("SELECT * FROM ingredients");
+    const ingredients = await pool.query("SELECT * FROM ingredients");
     res.render("ingredientlist", { title: "Ingredient List", ingredients: ingredients.rows });
 });

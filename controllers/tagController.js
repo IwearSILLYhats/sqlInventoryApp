@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
-const query = require("../db/pool");
+const pool = require("../db/pool");
 
 const tagValidation = [
     body("name").trim().escape()
@@ -12,7 +12,7 @@ const tagValidation = [
 
 // tag GET for one tag
 exports.getTag = asyncHandler(async (req, res) => {
-    const tag = await query(`SELECT * FROM tags WHERE tag_id = ${req.params.id}`);
+    const tag = await pool.query(`SELECT * FROM tags WHERE tag_id = ${req.params.id}`);
     if(tag === null) {
         res.redirect("/tags");
     }
@@ -36,7 +36,7 @@ exports.createTagPost = [
                 tag: req.body
             });
         }
-        await query(`INSERT INTO tags (tag, tag_description)
+        await pool.query(`INSERT INTO tags (tag, tag_description)
             VALUES ('${req.body.name}', '${req.body.description}')`);
         res.redirect("/tags");
     })
@@ -44,7 +44,7 @@ exports.createTagPost = [
 
 // handle GET for tag update form
 exports.updateTagGet = asyncHandler( async (req, res, next) => {
-    const tag = await query(`SELECT * FROM tags WHERE tag_id = ${req.params.id}`);
+    const tag = await pool.query(`SELECT * FROM tags WHERE tag_id = ${req.params.id}`);
     if (tag === null) {
         return res.redirect("/tags")
     }
@@ -68,7 +68,7 @@ exports.updateTagPost = [
                 tag: tag
             });
         }
-        await query({
+        await pool.query({
             text: "UPDATE tags SET (tag, tag_description) = ($1, $2)WHERE tag_id = $3",
             values: [tag.tag, tag.description, tag.id]
         });
@@ -87,6 +87,6 @@ exports.deleteTagPost = (req, res) => {
 
 // GET full list of tags
 exports.tagList = asyncHandler(async (req, res, next) => {
-    const tags = await query("SELECT * FROM tags");
+    const tags = await pool.query("SELECT * FROM tags");
     res.render("taglist", { title: "Tag List", tags: tags.rows });
 });

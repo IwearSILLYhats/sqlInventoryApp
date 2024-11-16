@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
-const query = require("../db/pool");
+const pool = require("../db/pool");
 
 const recipeValidation = [
     body("name").trim().escape()
@@ -15,7 +15,7 @@ const recipeValidation = [
 
 // recipe GET for one recipe
 exports.getRecipe = asyncHandler( async (req, res) => {
-    const recipe = await query({
+    const recipe = await pool.query({
         text: "SELECT * FROM recipes WHERE recipe_id = $1",
         values: [req.params.id]
     });
@@ -32,8 +32,8 @@ exports.getRecipe = asyncHandler( async (req, res) => {
 exports.createRecipeGet = asyncHandler ( async (req, res) => {
 
     const [tags, ingredients] = await Promise.all([
-        query ("SELECT tag_id AS id, tag AS name from tags"), 
-        query ("SELECT ingredient_id AS id, ingredient_name AS name from ingredients")]);
+        pool.query ("SELECT tag_id AS id, tag AS name from tags"), 
+        pool.query ("SELECT ingredient_id AS id, ingredient_name AS name from ingredients")]);
 
     res.render("recipeForm", {
         title: "Create a recipe",
@@ -51,8 +51,8 @@ exports.createRecipePost = [
 
         if(!errors.isEmpty()) {
             const [tags, ingredients] = await Promise.all([
-                query ("SELECT tag_id AS id, tag AS name from tags"), 
-                query ("SELECT ingredient_id AS id, ingredient_name AS name from ingredients")]);
+                pool.query ("SELECT tag_id AS id, tag AS name from tags"), 
+                pool.query ("SELECT ingredient_id AS id, ingredient_name AS name from ingredients")]);
             compareLists(tags.rows, req.body.tags);
             compareLists(ingredients.rows, req.body.ingredients);
 
@@ -68,11 +68,11 @@ exports.createRecipePost = [
             })
         }
         else {
-            const newRecipe = await query({
+            const newRecipe = await pool.query({
                 text:"INSERT INTO recipes (recipe_name, recipe_description) VALUES ($1, $2) RETURNING recipe_id",
                 values: [req.body.name, req.body.description]
             });
-            // TO DO - replace query with pool to enable transactions for junction tables
+            // TO DO - replace pool.query with pool to enable transactions for junction tables
         }
     })
 ]
@@ -99,7 +99,7 @@ exports.deleteRecipePost = (req, res) => {
 
 // GET full list of recipes
 exports.recipeList = asyncHandler( async (req, res) => {
-    const recipes = await query("SELECT * FROM recipes");
+    const recipes = await pool.query("SELECT * FROM recipes");
     res.render("recipelist", { title: "Recipe List", recipes: recipes.rows });
 });
 
