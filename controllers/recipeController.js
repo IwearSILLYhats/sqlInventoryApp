@@ -16,7 +16,9 @@ const recipeValidation = [
 // recipe GET for one recipe
 exports.getRecipe = asyncHandler( async (req, res) => {
     const recipe = await pool.query({
-        text: "SELECT * FROM recipes WHERE recipe_id = $1",
+        text: `
+        SELECT * FROM recipes 
+        WHERE recipe_id = $1`,
         values: [req.params.id]
     });
     if(recipe.rows[0] === undefined) {
@@ -32,8 +34,10 @@ exports.getRecipe = asyncHandler( async (req, res) => {
 exports.createRecipeGet = asyncHandler ( async (req, res) => {
 
     const [tags, ingredients] = await Promise.all([
-        pool.query ("SELECT tag_id AS id, tag AS name from tags"), 
-        pool.query ("SELECT ingredient_id AS id, ingredient_name AS name from ingredients")]);
+        pool.query (`
+            SELECT tag_id AS id, tag AS name from tags`), 
+        pool.query (`
+            SELECT ingredient_id AS id, ingredient_name AS name from ingredients`)]);
 
     res.render("recipeForm", {
         title: "Create a recipe",
@@ -45,17 +49,45 @@ exports.createRecipeGet = asyncHandler ( async (req, res) => {
 // handle POST for recipe creation form
 // WIP
 exports.createRecipePost = [
+    // Validate and sanitize form output
     recipeValidation,
     asyncHandler( async (req, res) => {
+        // Check for errors and rerender form with error info if any are found
         const errors = validationResult(req);
-
         if(!errors.isEmpty()) {
-            const [tags, ingredients] = await Promise.all([
-                pool.query ("SELECT tag_id AS id, tag AS name from tags"), 
-                pool.query ("SELECT ingredient_id AS id, ingredient_name AS name from ingredients")]);
-            compareLists(tags.rows, req.body.tags);
-            compareLists(ingredients.rows, req.body.ingredients);
 
+            let [tags, ingredients] = await Promise.all([
+                pool.query({
+                    text:`
+                        SELECT 
+                            tag_id AS id,
+                            tag AS name
+                        FROM 
+                            tags`
+                }), 
+                pool.query({
+                    text: `
+                        SELECT 
+                            ingredient_id AS id,
+                            ingredient_name AS name
+                        FROM 
+                            ingredients`
+                })
+            ]);
+
+            // Compare tag and ingredient list to form output so that boxes stay checked
+            if(typeof req.body.tags !== "undefined") {
+                tags.rows.forEach(tag => {
+                    tag.checked = [...req.body.tags].includes(tag.id.toString());
+                });
+            }
+            if(typeof req.body.ingredients !== "undefined") {
+                ingredients.rows.forEach(ingredient => {
+                    ingredient.checked = [...req.body.ingredients].includes(ingredient.id.toString());
+                });
+            }
+
+            // Rerender form, including already entered data and error info
             return res.render("recipeForm", {
                 title: "Create a recipe",
                 tags: tags.rows,
@@ -64,18 +96,43 @@ exports.createRecipePost = [
                     recipe_name: req.body.name,
                     recipe_description: req.body.description
                 },
-                errors: errors
+                errors: errors.array()
             })
         }
+        // Begin transaction since this needs to be an all or nothing update
         else {
-            const newRecipe = await pool.query({
-                text:"INSERT INTO recipes (recipe_name, recipe_description) VALUES ($1, $2) RETURNING recipe_id",
-                values: [req.body.name, req.body.description]
-            });
-            // TO DO - replace pool.query with pool to enable transactions for junction tables
+            const client = await pool.connect();
+            try{
+                await client.query('BEGIN');
+
+                const newRecipe = await client.query({
+                    text:"INSERT INTO recipes (recipe_name, recipe_description) VALUES ($1, $2) RETURNING recipe_id",
+                    values: [req.body.name, req.body.description]
+                });
+
+                if(req.body.tags.length > 0) {
+                    await client.query({
+                        text: `
+                        INSERT INTO tagrecipes (recipeid, tagid)
+                        VALUES
+                            $1
+                        ON CONFLICT DO NOTHING`,
+                        values: [generateInsertSql(req.params.id, req.body.tags)]
+                    })
+                }
+                
+
+                await client.query('COMMIT')
+
+            } catch(e) {
+                await client.query('ROLLBACK')
+                throw e
+            } finally {
+                client.release()
+            }
         }
     })
-]
+];
 
 // handle GET for recipe update form
 exports.updateRecipeGet = (req, res) => {
@@ -110,3 +167,8 @@ function compareLists (fullList, selected) {
         }
     })
 };
+
+function generateInsertSql (mainColumn, secondColumn) {
+    let junctionArray = secondColumn.map(id => `(${mainColumn}, ${secondColumn})`)
+    return junctionArray.join(", ");
+}

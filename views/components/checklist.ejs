@@ -4,7 +4,7 @@
         <% data.forEach(item => { %>
             <div>
                 <label for="<%= item.name %>"><%= item.name %></label>
-                <input type="checkbox" name="<%= header %>" id="<%= item.name %>" value="<%= item.id %>" checked=<%= item.hasOwnProperty("checked") ? item.checked : false %>>
+                <input type="checkbox" name="<%= header.toLowerCase() %>" id="<%= item.name %>" value="<%= item.id %>" <%= item.hasOwnProperty("checked") && item.checked ? "checked" : "" %>>
             </div>
         <% }) %>
     <% } else { %>

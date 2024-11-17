@@ -33,7 +33,10 @@ exports.createTagPost = [
             return res.render("tagForm", {
                 title: "Create New Tag",
                 errors: errors.array(),
-                tag: req.body
+                tag: {
+                    tag: req.body.name,
+                    tag_description: req.body.description
+                }
             });
         }
         await pool.query(`INSERT INTO tags (tag, tag_description)
