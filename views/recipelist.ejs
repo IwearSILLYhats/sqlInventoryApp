@@ -5,7 +5,7 @@
         <% recipes.forEach(recipe => { %>
             <div>
                 <a href=<%= `/recipes/${recipe.recipe_id}` %>>
-                    <h3> <%= recipe.recipe %> </h3>
+                    <h3> <%= recipe.recipe_name %> </h3>
                 </a>
             </div>
         <% }) %>

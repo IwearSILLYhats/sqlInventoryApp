@@ -9,7 +9,6 @@ const recipeValidation = [
     body("tags"),
     body("ingredients"),
     body("description").trim().escape()
-    .isAlphanumeric().withMessage("Description must be alphanumeric")
     .optional()
 ];
 
@@ -110,7 +109,7 @@ exports.createRecipePost = [
                     values: [req.body.name, req.body.description]
                 });
 
-                if(req.body.tags.length > 0) {
+                if(typeof req.body.tags !== "undefined" && req.body.tags.length > 0) {
                     await client.query({
                         text: `
                         INSERT INTO tagrecipes (recipeid, tagid)
@@ -129,6 +128,7 @@ exports.createRecipePost = [
                 throw e
             } finally {
                 client.release()
+                res.redirect("/recipes");
             }
         }
     })
@@ -159,14 +159,6 @@ exports.recipeList = asyncHandler( async (req, res) => {
     const recipes = await pool.query("SELECT * FROM recipes");
     res.render("recipelist", { title: "Recipe List", recipes: recipes.rows });
 });
-
-function compareLists (fullList, selected) {
-    fullList.forEach(item => {
-        if (selected.includes(item.id)) {
-            item.checked = true;
-        }
-    })
-};
 
 function generateInsertSql (mainColumn, secondColumn) {
     let junctionArray = secondColumn.map(id => `(${mainColumn}, ${secondColumn})`)
