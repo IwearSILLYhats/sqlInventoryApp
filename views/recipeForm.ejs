@@ -5,5 +5,6 @@
     <textarea name="description" id="description" placeholder="Recipe description"><%- typeof recipe !== "undefined" ? recipe.recipe_description : '' %></textarea>
      <%- include('components/checklist', { header: "Ingredients", data: ingredients}) %>
      <%- include('components/checklist', { header: "Tags", data: tags}) %>
+     <input type="hidden" name="id" value="<%= typeof recipe !== "undefined" ? recipe.recipe_id : "" %>">
     <button type="submit">Submit</button>
 </form>

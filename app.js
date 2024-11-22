@@ -22,7 +22,6 @@ app.use("/recipes", recipeRouter);
 app.use("/ingredients", ingredientRouter);
 app.use((err, req, res, next) => {
     console.error(err);
-    res.status(500).send(err);
 });
 
 const PORT = process.env.PORT || 3000;

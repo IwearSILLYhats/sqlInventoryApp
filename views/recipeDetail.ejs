@@ -3,8 +3,31 @@
         <h1> <%= recipe.recipe_name %></h1>
         <p> <%- recipe.recipe_description %> </p>
         <h3>Ingredients:</h3>
-        
+        <ul>
+            <% if(typeof ingredients !== "undefined" && ingredients.length > 0) { %>
+                <% ingredients.forEach(ingredient => { %>
+                    <a href="/ingredients/<%= ingredient.ingredient_id %>">
+                        <p>
+                            <%= ingredient.ingredient_name %>
+                        </p>
+                    </a>
+                <% })} else { %>
+                        <p>No ingredients currently selected on this recipe.</p>
+                    <% } %>
+        </ul>
         <h3>Tags:</h3>
+        <ul>
+            <% if(typeof tags !== "undefined" && tags.length > 0) { %>
+                <% tags.forEach(tag => { %>
+                    <a href="/tags/<%= tag.tag_id %>">
+                        <p>
+                            <%= tag.tag %>
+                        </p>
+                    </a>
+                <% })} else { %>
+                        <p>No tags currently selected on this recipe.</p>
+                    <% } %>
+        </ul>
     </div>
     <div>
         <a href="/tags/update/<%= recipe.recipe_id %>">

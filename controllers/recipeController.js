@@ -14,18 +14,46 @@ const recipeValidation = [
 
 // recipe GET for one recipe
 exports.getRecipe = asyncHandler( async (req, res) => {
-    const recipe = await pool.query({
-        text: `
-        SELECT * FROM recipes 
-        WHERE recipe_id = $1`,
-        values: [req.params.id]
-    });
+
+    const [recipe, ingredients, tags] = await Promise.all([
+        pool.query({
+            text: `
+                SELECT * FROM recipes 
+                WHERE recipe_id = $1`,
+            values: [req.params.id]
+        }),
+        pool.query({
+            text: `
+                SELECT * FROM recipeingredients
+                INNER JOIN
+                    ingredients
+                ON
+                    ingredientid = ingredient_id
+                WHERE
+                    recipeid = $1`,
+            values: [req.params.id]
+        }),
+        pool.query({
+            text: `
+                SELECT * FROM tagrecipes
+                INNER JOIN
+                    tags
+                ON
+                    tagid = tag_id
+                WHERE
+                    recipeid = $1`,
+            values: [req.params.id]
+        })
+    ]);
+
     if(recipe.rows[0] === undefined) {
         return res.redirect("/recipes");
     }
     res.render("recipeDetail", {
         title: "Recipe Detail",
-        recipe: recipe.rows[0]
+        recipe: recipe.rows[0],
+        ingredients: ingredients.rows,
+        tags: tags.rows
     });
 });
 
@@ -108,15 +136,25 @@ exports.createRecipePost = [
                     text:"INSERT INTO recipes (recipe_name, recipe_description) VALUES ($1, $2) RETURNING recipe_id",
                     values: [req.body.name, req.body.description]
                 });
-
+                console.log(generateInsertSql(newRecipe.rows[0].recipe_id, [...req.body.tags]));
                 if(typeof req.body.tags !== "undefined" && req.body.tags.length > 0) {
                     await client.query({
                         text: `
                         INSERT INTO tagrecipes (recipeid, tagid)
                         VALUES
-                            $1
+                            ${generateInsertSql(newRecipe.rows[0].recipe_id, [...req.body.tags])}
                         ON CONFLICT DO NOTHING`,
-                        values: [generateInsertSql(req.params.id, req.body.tags)]
+                        values: []
+                    })
+                }
+                if(typeof req.body.ingredients !== "undefined" && req.body.ingredients.length > 0) {
+                    await client.query({
+                        text: `
+                        INSERT INTO recipeingredients (recipeid, ingredientid)
+                        VALUES
+                            ${generateInsertSql(newRecipe.rows[0].recipe_id, [...req.body.ingredients])}
+                        ON CONFLICT DO NOTHING`,
+                        values: []
                     })
                 }
                 
@@ -161,6 +199,6 @@ exports.recipeList = asyncHandler( async (req, res) => {
 });
 
 function generateInsertSql (mainColumn, secondColumn) {
-    let junctionArray = secondColumn.map(id => `(${mainColumn}, ${secondColumn})`)
+    let junctionArray = secondColumn.map(id => `(${mainColumn}, ${id})`)
     return junctionArray.join(", ");
 }
