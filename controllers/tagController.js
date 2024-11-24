@@ -4,7 +4,6 @@ const pool = require("../db/pool");
 
 const tagValidation = [
     body("name").trim().escape()
-    .isAlphanumeric().withMessage("Tag name must be alphanumeric")
     .isLength(3).withMessage("Tag name must be at least 3 characters"),
     body("description").trim().escape()
     .optional()

@@ -74,7 +74,6 @@ exports.createRecipeGet = asyncHandler ( async (req, res) => {
 });
 
 // handle POST for recipe creation form
-// WIP
 exports.createRecipePost = [
     // Validate and sanitize form output
     recipeValidation,
@@ -136,7 +135,6 @@ exports.createRecipePost = [
                     text:"INSERT INTO recipes (recipe_name, recipe_description) VALUES ($1, $2) RETURNING recipe_id",
                     values: [req.body.name, req.body.description]
                 });
-                console.log(generateInsertSql(newRecipe.rows[0].recipe_id, [...req.body.tags]));
                 if(typeof req.body.tags !== "undefined" && req.body.tags.length > 0) {
                     await client.query({
                         text: `
@@ -173,9 +171,69 @@ exports.createRecipePost = [
 ];
 
 // handle GET for recipe update form
-exports.updateRecipeGet = (req, res) => {
+// WIP
+exports.updateRecipeGet = asyncHandler (async (req, res) => {
+    const [recipe, tags, ingredients] = await Promise.all([
+        pool.query({
+            text: `
+                SELECT
+                    *
+                FROM
+                    recipes
+                WHERE
+                    recipe_id = $1`,
+            values: [req.params.id]
+        }),
+        pool.query({
+            text: `
+                SELECT
+                    tag AS name,
+                    tag_id AS id,
+                    CASE
+                        WHEN recipeid = $1 THEN 1
+                    ELSE
+                        0
+                    END AS checked
+                FROM
+                    tags
+                LEFT JOIN
+                    tagrecipes
+                ON
+                    tagid = tag_id`,
+            values: [req.params.id]
+        }),
+        pool.query({
+            text: `
+                SELECT
+                    ingredient_name AS name,
+                    ingredient_id AS id,
+                    CASE
+                        WHEN recipeid = $1 THEN 1
+                    ELSE
+                        0
+                    END AS checked
+                FROM
+                    ingredients
+                LEFT JOIN
+                    recipeingredients
+                ON
+                    ingredientid = ingredient_id`,
+            values: [req.params.id]
+        })
+    ]);
 
-};
+    if(recipe !== null) {
+        res.render("recipeForm", {
+                title: "Update a recipe",
+                tags: tags.rows,
+                ingredients: ingredients.rows,
+                recipe: recipe.rows[0]
+            })
+    }
+    else {
+        res.redirect("/recipes");
+    }
+});
 
 // handle POST for recipe update form
 exports.updateRecipePost = (req, res) => {
