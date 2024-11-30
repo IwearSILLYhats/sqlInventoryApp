@@ -171,7 +171,7 @@ exports.createRecipePost = [
 ];
 
 // handle GET for recipe update form
-// WIP
+// WIP - duplicate ingredients when attempting to update recipe
 exports.updateRecipeGet = asyncHandler (async (req, res) => {
     const [recipe, tags, ingredients] = await Promise.all([
         pool.query({
@@ -215,7 +215,12 @@ exports.updateRecipeGet = asyncHandler (async (req, res) => {
                 FROM
                     ingredients
                 LEFT JOIN
-                    recipeingredients
+                    (SELECT
+                        *
+                    FROM
+                        recipeingredients
+                    WHERE
+                        recipeid = $1) AS junction
                 ON
                     ingredientid = ingredient_id`,
             values: [req.params.id]
@@ -236,9 +241,136 @@ exports.updateRecipeGet = asyncHandler (async (req, res) => {
 });
 
 // handle POST for recipe update form
-exports.updateRecipePost = (req, res) => {
+exports.updateRecipePost = [
+    recipeValidation,
+    asyncHandler( async (req, res) => {
+        // Check for errors and rerender form with error info if any are found
+        const errors = validationResult(req);
+        if(!errors.isEmpty()) {
 
-};
+            let [tags, ingredients] = await Promise.all([
+                pool.query({
+                    text:`
+                        SELECT 
+                            tag_id AS id,
+                            tag AS name
+                        FROM 
+                            tags`
+                }), 
+                pool.query({
+                    text: `
+                        SELECT 
+                            ingredient_id AS id,
+                            ingredient_name AS name
+                        FROM 
+                            ingredients`
+                })
+            ]);
+
+            // Compare tag and ingredient list to form output so that boxes stay checked
+            if(typeof req.body.tags !== "undefined") {
+                tags.rows.forEach(tag => {
+                    tag.checked = [...req.body.tags].includes(tag.id.toString());
+                });
+            }
+            if(typeof req.body.ingredients !== "undefined") {
+                ingredients.rows.forEach(ingredient => {
+                    ingredient.checked = [...req.body.ingredients].includes(ingredient.id.toString());
+                });
+            }
+
+            // Rerender form, including already entered data and error info
+            return res.render("recipeForm", {
+                title: "Update a recipe",
+                tags: tags.rows,
+                ingredients: ingredients.rows,
+                recipe: {
+                    recipe_id: req.body.id,
+                    recipe_name: req.body.name,
+                    recipe_description: req.body.description
+                },
+                errors: errors.array()
+            })
+        }
+        // Begin transaction since this needs to be an all or nothing update
+        else {
+            const client = await pool.connect();
+            try{
+                await client.query('BEGIN');
+
+                const newRecipe = await client.query({
+                    text:`
+                        UPDATE 
+                            recipes 
+                            SET
+                                (recipe_name, recipe_description) =  ($1, $2)
+                            WHERE
+                                recipe_id = $3`,
+                    values: [req.body.name, req.body.description, req.body.id]
+                });
+                if(typeof req.body.tags !== "undefined" && req.body.tags.length > 0) {
+
+                    const taglist = generateInsertSql(req.body.id, [...req.body.tags]);
+
+                    await client.query({
+                        text: `
+                            INSERT INTO 
+                                tagrecipes 
+                                    (recipeid, tagid)
+                            VALUES
+                                ${taglist}
+                            ON CONFLICT DO NOTHING`,
+                        values: []
+                    })
+
+                    await client.query({
+                        text: `
+                            DELETE FROM
+                                tagrecipes 
+                            WHERE
+                                recipeid = $1 AND tagid != ALL($2)
+                            `,
+                        values: [req.body.id, [...req.body.tags]]
+                    })
+                }
+                if(typeof req.body.ingredients !== "undefined" && req.body.ingredients.length > 0) {
+
+                    const ingredientlist = generateInsertSql(req.body.id, [...req.body.ingredients]);
+
+                    await client.query({
+                        text: `
+                            INSERT INTO
+                                recipeingredients 
+                                    (recipeid, ingredientid)
+                            VALUES
+                                ${ingredientlist}
+                            ON CONFLICT DO NOTHING`,
+                        values: []
+                    })
+
+                    await client.query({
+                        text: `
+                            DELETE FROM
+                                recipeingredients 
+                            WHERE
+                                recipeid = $1 AND ingredientid != ALL($2)
+                            `,
+                        values: [req.body.id, [...req.body.ingredients]]
+                    })
+                }
+
+                await client.query('COMMIT')
+
+            } catch(e) {
+                await client.query('ROLLBACK')
+                throw e
+            } finally {
+                client.release()
+                res.redirect(`/recipes/${req.body.id}`);
+            }
+        }
+    })
+];
 
 // handle GET for recipe deletion form
 exports.deleteRecipeGet = (req, res) => {
