@@ -171,7 +171,6 @@ exports.createRecipePost = [
 ];
 
 // handle GET for recipe update form
-// WIP - duplicate ingredients when attempting to update recipe
 exports.updateRecipeGet = asyncHandler (async (req, res) => {
     const [recipe, tags, ingredients] = await Promise.all([
         pool.query({
@@ -197,7 +196,12 @@ exports.updateRecipeGet = asyncHandler (async (req, res) => {
                 FROM
                     tags
                 LEFT JOIN
-                    tagrecipes
+                    (SELECT
+                        *
+                    FROM
+                        tagrecipes
+                    WHERE
+                        recipeid = $1) AS junction
                 ON
                     tagid = tag_id`,
             values: [req.params.id]

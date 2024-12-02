@@ -78,14 +78,81 @@ exports.updateTagPost = [
 })];
 
 // handle GET for tag deletion form
-exports.deleteTagGet = (req, res) => {
-
-};
+exports.deleteTagGet = asyncHandler(async (req, res) => {
+    const [recipes, tag] = await Promise.all([pool.query({
+        text: `
+            SELECT
+                *
+            FROM
+                tagrecipes
+            LEFT JOIN
+                recipes
+            ON
+                recipeid = recipe_id
+            WHERE
+                tagid = $1`,
+        values: [req.params.id]
+        }),
+        pool.query({
+            text: `
+                SELECT
+                    *
+                FROM
+                    tags
+                WHERE
+                    tag_id = $1`,
+            values: [req.params.id]
+        })
+    ])
+    
+    if(tag !== null) {
+        res.render("tagDelete", {
+            title: "Delete a tag",
+            recipes: recipes.rows,
+            tag: tag.rows[0]
+        })
+    }
+    else {
+        res.redirect("/tags")
+    }
+});
 
 // handle POST for tag deletion form
-exports.deleteTagPost = (req, res) => {
+exports.deleteTagPost = asyncHandler( async (req, res) => {
+    const client = await pool.connect();
+        try{
+            const tagid = parseInt(req.body.id);
 
-};
+            await client.query('BEGIN');
+
+            await Promise.all([
+                client.query({
+                    text: `
+                        DELETE FROM
+                            tagrecipes
+                        WHERE
+                            tagid = $1`,
+                    values: [tagid]
+                }),
+                client.query({
+                    text: `
+                        DELETE FROM
+                            tags
+                        WHERE
+                            tag_id = $1`,
+                    values: [tagid]
+                })
+            ])
+            await client.query('COMMIT')
+
+        } catch(e) {
+            await client.query('ROLLBACK')
+            throw e
+        } finally {
+            client.release()
+            res.redirect("/tags");
+        }
+});
 
 // GET full list of tags
 exports.tagList = asyncHandler(async (req, res, next) => {
