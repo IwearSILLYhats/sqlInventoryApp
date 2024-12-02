@@ -377,14 +377,73 @@ exports.updateRecipePost = [
 ];
 
 // handle GET for recipe deletion form
-exports.deleteRecipeGet = (req, res) => {
-
-};
+exports.deleteRecipeGet = asyncHandler(async (req, res) => {
+    const recipe = await pool.query({
+        text: `
+            SELECT
+                *
+            FROM
+                recipes
+            WHERE
+                recipe_id = $1`,
+        values: [req.params.id]
+    });
+    
+    if(recipe !== null) {
+        res.render("recipeDelete", {
+            title: "Delete a recipe",
+            recipe: recipe.rows[0]
+        })
+    }
+    else {
+        res.redirect("/recipes")
+    }
+});
 
 // handle POST for recipe deletion form
-exports.deleteRecipePost = (req, res) => {
+exports.deleteRecipePost = asyncHandler( async (req, res) => {
+    const client = await pool.connect();
+        try{
+            const recipeid = parseInt(req.body.id);
 
-};
+            await client.query('BEGIN');
+
+            await Promise.all([
+                client.query({
+                    text: `
+                        DELETE FROM
+                            tagrecipes
+                        WHERE
+                            recipeid = $1`,
+                    values: [recipeid]
+                }),
+                client.query({
+                    text:`
+                        DELETE FROM
+                            recipeingredients
+                        WHERE
+                            recipeid = $1`,
+                    values: [recipeid]
+                }),
+                client.query({
+                    text: `
+                        DELETE FROM
+                            recipes
+                        WHERE
+                            recipe_id = $1`,
+                    values: [recipeid]
+                })
+            ])
+            await client.query('COMMIT')
+
+        } catch(e) {
+            await client.query('ROLLBACK')
+            throw e
+        } finally {
+            client.release()
+            res.redirect("/recipes");
+        }
+});
 
 // GET full list of recipes
 exports.recipeList = asyncHandler( async (req, res) => {
