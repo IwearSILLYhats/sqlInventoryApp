@@ -94,14 +94,82 @@ exports.updateIngredientPost = [
 ];
 
 // handle GET for ingredient deletion form
-exports.deleteIngredientGet = (req, res) => {
+exports.deleteIngredientGet = asyncHandler( async (req, res) => {
+    const [ingredient, recipes] = await Promise.all([
+        pool.query({
+            text: `
+                SELECT
+                    *
+                FROM
+                    ingredients
+                WHERE
+                    ingredient_id = $1`,
+            values: [req.params.id]
+        }),
+        pool.query({
+            text: `
+                SELECT
+                    *
+                FROM
+                    recipeingredients
+                LEFT JOIN
+                    recipes
+                ON
+                    recipeid = recipe_id
+                WHERE
+                    ingredientid = $1`,
+            values: [req.params.id]
+        })
+    ]);
 
-};
+    if(ingredient !== null) {
+        res.render("ingredientDelete", {
+            title: "Delete an ingredient",
+            ingredient: ingredient.rows[0],
+            recipes: recipes.rows
+        })
+    }
+    else{
+        res.redirect("/ingredients");
+    }
+});
 
 // handle POST for ingredient deletion form
-exports.deleteIngredientPost = (req, res) => {
+exports.deleteIngredientPost = asyncHandler( async (req, res) => {
+    const client = await pool.connect();
+        try{
+            const ingredientid = parseInt(req.body.id);
 
-};
+            await client.query('BEGIN');
+
+            await Promise.all([
+                client.query({
+                    text: `
+                        DELETE FROM
+                            recipeingredients
+                        WHERE
+                            ingredientid = $1`,
+                    values: [ingredientid]
+                }),
+                client.query({
+                    text: `
+                        DELETE FROM
+                            ingredients
+                        WHERE
+                            ingredient_id = $1`,
+                    values: [ingredientid]
+                })
+            ])
+            await client.query('COMMIT')
+
+        } catch(e) {
+            await client.query('ROLLBACK')
+            throw e
+        } finally {
+            client.release()
+            res.redirect("/ingredients");
+        }
+});
 
 // GET full list of ingredients
 exports.ingredientList = asyncHandler( async (req, res) => {
